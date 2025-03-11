@@ -1,0 +1,46 @@
+[
+    {
+        "nodeId": "node1",
+        "rootNode": true,
+        "prompt": "Ask if the user is {username}",
+        "edges": [
+            {
+                "condition": "user is {username}",
+                "targetNodeId": "node2"
+            },
+            {
+                "condition": "user is not {username}",
+                "targetNodeId": "node3"
+            }
+        ]
+    },
+    {
+        "nodeId": "node2",
+        "prompt": "Introduce yourself & ask if we can conduct interview with {username} right now",
+        "edges": [
+            {
+                "condition": "user is ready to start the interview",
+                "targetNodeId": "node4"
+            },
+            {
+                "condition": "User is not ready to start the interview",
+                "targetNodeId": "node5"
+            }
+        ]
+    },
+    {
+        "nodeId": "node3",
+        "prompt": "Apologise to the user for expecting {username}",
+        "edges": []
+    },
+    {
+        "nodeId": "node4",
+        "prompt": "Start interview process with {username} by asking question 1: 'What are closure in Javascript ?'",
+        "edges": []
+    },
+    {
+        "nodeId": "node5",
+        "prompt": "Apologise to {username} & ask if you can end the call",
+        "edges": []
+    }
+]
