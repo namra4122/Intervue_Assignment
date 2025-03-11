@@ -5,7 +5,6 @@ from src.models.node import Node
 from src.models.edge import Edge
 
 def load_flow_from_json(file_path):
-    print("debug_logs = IN load_flow_from_json")
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Flow definition file not found: {file_path}")
     
@@ -17,7 +16,7 @@ def load_flow_from_json(file_path):
     for node_data in flow_data:
         node_id = node_data.get('nodeId')
         prompt = node_data.get('prompt')
-        root_node = node_data.get('root_node', False)
+        root_node = node_data.get('rootNode', False)
 
         node = Node(node_id,prompt, root_node=root_node)
         nodes[node_id] = node
@@ -28,7 +27,7 @@ def load_flow_from_json(file_path):
 
         for edges_data in edges_data:
             condition = edges_data.get('condition')
-            targetNode_id = edges_data.get('target_nodeId')
+            targetNode_id = edges_data.get('targetNodeId')
 
             edge = Edge(condition, targetNode_id=targetNode_id)
             nodes[node_id].add_edge(edge)

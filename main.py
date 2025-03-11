@@ -1,6 +1,7 @@
 import os
 import sys
 from dotenv import load_dotenv
+from google.genai import types
 from src.utils.json_loader import load_flow_from_json
 from src.services.llm_service import LLMService
 from src.services.flow_service import FlowService
@@ -16,7 +17,6 @@ def main(username = None):
     
     try:
         nodes = load_flow_from_json(flow_dir)
-        print(f"--------------------{nodes}--------------------")
         print(f"Loaded {len(nodes)} nodes from flow definition")
     except Exception as e:
         print(f"Error loading flow: {e}")
@@ -29,8 +29,10 @@ def main(username = None):
     print("Type 'exit' to quit")
 
     if flow_service.current_node:
-        print("debug_logs = IN flow_service.current_node CONDITION")
         initial_response = llm_service.generate_response(flow_service.current_node.prompt)
+        flow_service.chat_history.append(
+            types.Content( role="model", parts=[ types.Part.from_text(text=initial_response),],)
+        )
         print(f"Chatbot: {initial_response}")
     
     question_count = 0

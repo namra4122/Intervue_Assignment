@@ -2,12 +2,12 @@ from time import timezone
 import uuid
 from typing import List, TypedDict, Callable, Dict, Any
 from datetime import datetime, timezone
+from google.genai import types
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START, END
 
 class FlowService:
     def __init__(self, nodes, llm_service):
-        print("debug_logs = IN FlowService.__init__")
         self.nodes = nodes
         self.llm_service = llm_service
         self.current_node = None
@@ -21,12 +21,10 @@ class FlowService:
         if not self.current_node and nodes:
             self.current_node = list(nodes.values())[0]
         
-        print(f"--------------------{self.current_node}--------------------")
         
         self._setup_langgraph()
     
     def _setup_langgraph(self):
-        print("debug_logs = IN FlowService._setup_langgraph")
         self.memory = MemorySaver()
 
         class Input_schema(TypedDict):
@@ -35,6 +33,7 @@ class FlowService:
 
         class Output_schema(TypedDict):
             response: str
+            history: List[Dict[str, str]]
 
         self.graph = StateGraph(input=Input_schema, output=Output_schema)
 
@@ -47,14 +46,13 @@ class FlowService:
         )
     
     def _process_node(self, state):
-        print("debug_logs = IN FlowService._process_node")
         msg = state.get("message", "")
-        history = state.get("history", "")
-        print(f"--------------------{history}--------------------")
+        history = state.get("history", [])
         self.chat_history = history
 
         if self.chat_history and msg:
             self._process_user_input(msg)
+        
 
         response = self.llm_service.generate_response(self.current_node.prompt, self.chat_history)
 
@@ -62,17 +60,17 @@ class FlowService:
             "response" : response,
             "current_node" : self.current_node.node_id,
             "history" : self.chat_history + [
-                {"role" : "user", "content" : msg},
-                {"role": "assistant", "content" : response}
+                types.Content( role="user", parts=[ types.Part.from_text(text=msg),],),
+                types.Content( role="model", parts=[ types.Part.from_text(text=response),],),
             ]
         }
 
     def process_user_input(self, user_input, username, q_count):
-        print("debug_logs = IN FlowService.process_user_input")
         state = {
             "message": user_input,
             "history": self.chat_history
         }
+        print(f"--------------------{state}--------------------")
         thread_id = uuid.uuid4()
         result = self.workflow.invoke(
             state,
@@ -85,30 +83,43 @@ class FlowService:
                 }
             }
         )
+        print(f"--------------------{result}--------------------")
 
-        self.chat_history = result["history"]
-
-        return result["response"]
+        # Check if history exists in the result, otherwise keep the existing history
+        if "history" in result:
+            self.chat_history = result["history"]
+        
+        if "current_node" in result:
+            node_id = result["current_node"]
+            if node_id in self.nodes:
+                self.current_node = self.nodes[node_id]
+        
+        return result.get("response", "I'm not sure how to respond to that.")
 
     def _process_user_input(self, user_input):
-        print("debug_logs = IN FlowService._process_user_input")
-        if not self.current_node:
-            return
-
-        if not self.current_node.edges:
-            return
+        if not self.current_node or not self.current_node.edges:
+            return False
         
         conditions = [edge.condition for edge in self.current_node.edges]
 
-        matching_condition = self.llm_service.evaluate_condition(
+        matching_condition = self.llm_service.eval_condition(
             user_input, conditions, self.chat_history
         )
 
+        # Debug statement (remove in production)
+        print(f"Matching condition: {matching_condition}")
+
+        tranitioned = False
         for edge in self.current_node.edges:
             if edge.condition ==  matching_condition:
-                self.current_node = self.nodes.get(edge.target_node_id)
+                self.current_node = self.nodes.get(edge.targetNode_id)
+                tranitioned = True
+                # Debug statement (remove in production)
+                print(f"Transitioned to node: {self.current_node.node_id}")
                 break
-    
+        
+        return tranitioned
+
     def reset(self):
         for node in self.nodes.values():
             if node.root_node:

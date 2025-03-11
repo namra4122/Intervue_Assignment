@@ -10,18 +10,55 @@ if not GEMINI_API_KEY:
 
 class LLMService:
     def __init__(self, expected_username):
-        print("debug_logs = IN LLMService.__init__")
         agi.configure(api_key=GEMINI_API_KEY)
         self.model = agi.GenerativeModel('gemini-2.0-flash')
         self.username = expected_username
+
+    # history_pattern = [
+    #     types.Content(
+    #         role="model",
+    #         parts=[
+    #             types.Part.from_text(text="""Are you Namra?"""),
+    #         ],
+    #     ),
+    #     types.Content(
+    #         role="user",
+    #         parts=[
+    #             types.Part.from_text(text="""Yes I am"""),
+    #         ],
+    #     ),
+    #     types.Content(
+    #         role="model",
+    #         parts=[
+    #             types.Part.from_text(text="""It's nice to meet you, Namra. How can I help you today? """),
+    #         ],
+    #     ),
+    #     types.Content(
+    #         role="user",
+    #         parts=[
+    #             types.Part.from_text(text="""INSERT_INPUT_HERE"""),
+    #         ],
+    #     ),
+    # ]
+
+    ### BLOB HISTORY ERROR
+    # Error generating response: Could not create `Blob`, expected `Blob`, `dict` or an `Image` type(`PIL.Image.Image` or `IPython.display.Image`).
+    # Got a: <class 'google.genai.types.Content'>
+    # Value: parts=[Part(video_metadata=None, thought=None, code_execution_result=None, executable_code=None, file_data=None, function_call=None, function_response=None, inline_data=None, text='Are you Namra?\n')] role='model'
     
     def generate_response(self, prompt, chat_history = None):
         user_prompt = prompt.replace("{username}", self.username)
 
         try:
             if chat_history:
+                print(f"---------------Chat_history - {chat_history}----------")
+                print()
                 chat = self.model.start_chat(history=chat_history)
+                print(f"---------------Chat = {chat}----------")
+                print()
                 response = chat.send_message(user_prompt)
+                print(f"---------------Response = {response}----------")
+                print()
             else:
                 response = self.model.generate_content(user_prompt)
             
@@ -49,9 +86,6 @@ class LLMService:
         Conditions:
         {', '.join([f'"{c}"' for c in process_conditions])}
         """
-
-        temp = ', '.join([f'"{c}"' for c in process_conditions])
-        print(f"-----------{temp}---------------")
 
         try:
             response = self.model.generate_content(eval_prompt)
