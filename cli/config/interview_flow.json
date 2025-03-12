@@ -2,7 +2,7 @@
     {
         "nodeId": "node1",
         "rootNode": true,
-        "prompt": "Ask if the user is {username}",
+        "prompt": "Greet the user and ask if the user is {username}",
         "edges": [
             {
                 "condition": "user is {username}",

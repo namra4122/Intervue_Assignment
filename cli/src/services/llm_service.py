@@ -61,14 +61,24 @@ class LLMService:
             for condition in conditions
         ]
         
+        # updated the eval prompt
         eval_prompt = f"""
-        Based on the user's response: "{user_input}"
+        TASK: Evaluate the user's response to determine which condition is true.
 
-        Determine if the user id the expected candidate named {self.username} and their readiness.
+        USER RESPONSE: "{user_input}"
 
-        Which of the following conditions if true? Respond with  ONLY the matching condition.
-        Conditions:
-        {', '.join([f'"{c}"' for c in process_conditions])}
+        CONTEXT:
+        - Expected candidate name: {self.username}
+        - You need to determine if this is the expected candidate and assess their readiness
+        
+        INSTRUCTIONS:
+        1. Carefully analyze the user's response
+        2. Select EXACTLY ONE condition from the list below that best matches the response
+        3. Return ONLY the exact text of the matching condition with no additional text
+        4. If no condition clearly matches, select the first condition in the list
+
+        CONDITIONS:
+        {'\n'.join([f'- "{c}"' for c in process_conditions])}
         """
 
         try:

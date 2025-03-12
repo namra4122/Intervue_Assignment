@@ -1,0 +1,56 @@
+[
+    {
+        "nodeId": "node1",
+        "rootNode": true,
+        "prompt": "Greet the user and ask if the user is {username}",
+        "edges": [
+            {
+                "condition": "user is {username}",
+                "targetNodeId": "node2"
+            },
+            {
+                "condition": "user is not {username}",
+                "targetNodeId": "node3"
+            }
+        ]
+    },
+    {
+        "nodeId": "node2",
+        "prompt": "Introduce that you are an interview chatbot and ask {username} if we can conduct interview with him/her right now?",
+        "edges": [
+            {
+                "condition": "user is ready to start the interview",
+                "targetNodeId": "node4"
+            },
+            {
+                "condition": "user is not ready to start the interview",
+                "targetNodeId": "node5"
+            }
+        ]
+    },
+    {
+        "nodeId": "node3",
+        "prompt": "Apologise to the user for expecting {username} and tell user in polite manner that he/she can close the window to end the conversation.",
+        "edges": []
+    },
+    {
+        "nodeId": "node4",
+        "prompt": "Start interview process with {username} by asking question 1: 'What are closure in Javascript ?'",
+        "edges": [
+            {
+                "condition": "user answers the question",
+                "targetNodeId": "node6"
+            }
+        ]
+    },
+    {
+        "nodeId": "node5",
+        "prompt": "Apologise to {username} and tell user in polite manner that he/she can close the window to end the conversation.",
+        "edges": []
+    },
+    {
+        "nodeId": "node6",
+        "prompt": "Appreciate the answer of {username} and tell user in polite manner that he/she can close the window to end the conversation.",
+        "edges": []
+    }
+]

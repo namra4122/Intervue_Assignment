@@ -1,6 +1,0 @@
-langchain
-langgraph
-google-generativeai
-python-dotenv
-pytest
-langchain-google-genai
