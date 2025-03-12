@@ -29,11 +29,15 @@ def main(username = None):
     print("Type 'exit' to quit")
 
     if flow_service.current_node:
-        initial_response = llm_service.generate_response(flow_service.current_node.prompt)
+        initial_response_chunks = llm_service.generate_response(flow_service.current_node.prompt)
+        print("Interview Chatbot: ")
+        initial_response = ""
+        for chunk in initial_response_chunks:
+            initial_response = initial_response + chunk.text if chunk.text else ""
+            print(chunk.text, end="")
         flow_service.chat_history.append(
             types.Content( role="model", parts=[ types.Part.from_text(text=initial_response),],)
         )
-        print(f"Chatbot: {initial_response}")
     
     question_count = 0
     while True:

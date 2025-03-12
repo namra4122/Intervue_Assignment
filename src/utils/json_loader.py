@@ -27,9 +27,9 @@ def load_flow_from_json(file_path):
 
         for edges_data in edges_data:
             condition = edges_data.get('condition')
-            targetNode_id = edges_data.get('targetNodeId')
+            target_node_id = edges_data.get('targetNodeId')
 
-            edge = Edge(condition, targetNode_id=targetNode_id)
+            edge = Edge(condition, target_node_id=target_node_id)
             nodes[node_id].add_edge(edge)
     
     return nodes

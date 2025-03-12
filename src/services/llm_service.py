@@ -1,4 +1,5 @@
-import google.generativeai as agi
+import google.genai as agi
+import google.genai.types as types
 import os
 from dotenv import load_dotenv
 
@@ -10,70 +11,53 @@ if not GEMINI_API_KEY:
 
 class LLMService:
     def __init__(self, expected_username):
-        agi.configure(api_key=GEMINI_API_KEY)
-        self.model = agi.GenerativeModel('gemini-2.0-flash')
+        self.client = agi.Client(
+            api_key=GEMINI_API_KEY
+        )
+        self.model = 'gemini-2.0-flash'
         self.username = expected_username
-
-    # history_pattern = [
-    #     types.Content(
-    #         role="model",
-    #         parts=[
-    #             types.Part.from_text(text="""Are you Namra?"""),
-    #         ],
-    #     ),
-    #     types.Content(
-    #         role="user",
-    #         parts=[
-    #             types.Part.from_text(text="""Yes I am"""),
-    #         ],
-    #     ),
-    #     types.Content(
-    #         role="model",
-    #         parts=[
-    #             types.Part.from_text(text="""It's nice to meet you, Namra. How can I help you today? """),
-    #         ],
-    #     ),
-    #     types.Content(
-    #         role="user",
-    #         parts=[
-    #             types.Part.from_text(text="""INSERT_INPUT_HERE"""),
-    #         ],
-    #     ),
-    # ]
-
-    ### BLOB HISTORY ERROR
-    # Error generating response: Could not create `Blob`, expected `Blob`, `dict` or an `Image` type(`PIL.Image.Image` or `IPython.display.Image`).
-    # Got a: <class 'google.genai.types.Content'>
-    # Value: parts=[Part(video_metadata=None, thought=None, code_execution_result=None, executable_code=None, file_data=None, function_call=None, function_response=None, inline_data=None, text='Are you Namra?\n')] role='model'
+        self.generate_content_config = types.GenerateContentConfig(
+            temperature=1,
+            top_p=0.95,
+            top_k=40,
+            max_output_tokens=8192,
+            response_mime_type="text/plain",
+        )
     
     def generate_response(self, prompt, chat_history = None):
-        user_prompt = prompt.replace("{username}", self.username)
+        user_prompt = prompt.format(username=self.username)
 
         try:
             if chat_history:
-                print(f"---------------Chat_history - {chat_history}----------")
-                print()
-                chat = self.model.start_chat(history=chat_history)
-                print(f"---------------Chat = {chat}----------")
-                print()
-                response = chat.send_message(user_prompt)
-                print(f"---------------Response = {response}----------")
-                print()
+                chunks = self.client.models.generate_content_stream(
+                    model=self.model,
+                    contents=chat_history + [
+                        types.Content(
+                            role="user", 
+                            parts=[types.Part.from_text(text=user_prompt)]
+                        )
+                    ],
+                    config=self.generate_content_config,
+                )
             else:
-                response = self.model.generate_content(user_prompt)
+                chunks = self.client.models.generate_content_stream(
+                    model=self.model,
+                    contents= user_prompt,
+                    config=self.generate_content_config,
+                )
             
-            return response.text
+            return chunks
         except Exception as e:
             print(f"Error generating response: {e}")
-            return "I'm having trouble processing that request. Try again later"
-    
+            raise Exception("I'm having trouble processing that request. Try again later")
+
     def eval_condition(self, user_input, conditions, chat_history=None):
         
         if not conditions:
             return None
         
         process_conditions = [
-            condition.replace("{username}", self.username)
+            condition.format(username=self.username)
             for condition in conditions
         ]
         
@@ -88,8 +72,15 @@ class LLMService:
         """
 
         try:
-            response = self.model.generate_content(eval_prompt)
-            result = response.text.strip()
+            chunks = self.client.models.generate_content_stream(
+                model=self.model,
+                contents= eval_prompt,
+                config=self.generate_content_config,
+            )
+            response = ""
+            for chunk in chunks:
+                response = response + chunk.text if chunk.text else ""
+            result = response.strip()
 
             for i, condition in enumerate(process_conditions):
                 if condition.lower() in result.lower():
