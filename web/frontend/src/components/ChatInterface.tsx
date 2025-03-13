@@ -115,7 +115,7 @@ function ChatInterface({ sessionInfo, setSessionInfo }: ChatInterfaceProps) {
         setError('');
 
         try {
-            const response = await fetch('http://0.0.0.0:8000/api/reset', {
+            const response = await fetch('https://namra4122-intervueassignmentbackend.hf.space/api/reset', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
