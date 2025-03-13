@@ -2,5 +2,5 @@ langchain
 langgraph
 google-genai
 python-dotenv
-fastapi
+fastapi[standard]
 uvicorn
