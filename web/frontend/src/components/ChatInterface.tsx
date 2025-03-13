@@ -63,7 +63,7 @@ function ChatInterface({ sessionInfo, setSessionInfo }: ChatInterfaceProps) {
         setError('');
 
         try {
-            const response = await fetch('http://0.0.0.0:8000/api/chat', {
+            const response = await fetch('https://namra4122-intervueassignmentbackend.hf.space/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -170,7 +170,7 @@ function ChatInterface({ sessionInfo, setSessionInfo }: ChatInterfaceProps) {
             {/* Header */}
             <header className="bg-blue-600 text-white p-4 shadow-md">
                 <div className="container mx-auto flex justify-between items-center">
-                    <h1 className="text-xl font-bold">Interview Bot</h1>
+                    <h1 className="text-xl font-bold">Intervue Bot</h1>
                     <div className="flex gap-2">
                         <button
                             onClick={resetChat}

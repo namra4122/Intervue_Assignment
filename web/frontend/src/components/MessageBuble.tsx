@@ -22,7 +22,7 @@ function MessageBubble({ message, username }: MessageBubbleProps) {
                 : 'bg-white text-gray-800 rounded-bl-none shadow-sm'
                 }`}>
                 <div className="font-medium text-sm mb-1">
-                    {isUser ? username : 'Interview Bot'}
+                    {isUser ? username : 'Intervue Bot'}
                 </div>
                 <div className="whitespace-pre-wrap">{text}</div>
                 <div className={`text-xs mt-1 text-right ${isUser ? 'text-blue-200' : 'text-gray-500'}`}>

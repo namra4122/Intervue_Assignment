@@ -1,6 +1,0 @@
-langchain
-langgraph
-google-genai
-python-dotenv
-fastapi[standard]
-uvicorn

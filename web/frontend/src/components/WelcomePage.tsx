@@ -38,7 +38,7 @@ function WelcomePage({ setSessionInfo }: WelcomePageProps) {
         const sessionId = uuidv4();
 
         try {
-            const response = await fetch('http://0.0.0.0:8000/api/init', {
+            const response = await fetch('https://namra4122-intervueassignmentbackend.hf.space/api/init', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
