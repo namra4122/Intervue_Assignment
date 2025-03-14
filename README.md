@@ -1,4 +1,4 @@
-# README for Interview Chatbot Project
+# INTERVUE ASSIGNMENT PROJECT
 
 ## Overview
 
